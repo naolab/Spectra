@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+dist
+dist-electron
+.env
+.idea
+.vscode
+*.log
+capture/mac/.build
+gui/dist
+gui/dist-electron
+mcp-server/dist
