@@ -10,3 +10,4 @@ capture/mac/.build
 gui/dist
 gui/dist-electron
 mcp-server/dist
+settings.json
