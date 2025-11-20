@@ -141,7 +141,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return await captureBasedOnSettings(settings);
             }
             case "screen_list_windows": {
-                const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ["list_windows"]);
+                const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ["list_windows"], {
+                    maxBuffer: 10 * 1024 * 1024, // 10MB buffer for window list
+                });
                 return {
                     content: [
                         {
@@ -277,7 +279,9 @@ async function captureBasedOnSettings(settings: Settings) {
 }
 
 async function runCaptureCommand(command: string, args: string[]) {
-    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args]);
+    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args], {
+        maxBuffer: 50 * 1024 * 1024, // 50MB buffer for high-resolution captures
+    });
     // Swift outputs JSON: { type: "image", format: "jpeg", data: "base64..." }
     // We need to parse it.
     try {

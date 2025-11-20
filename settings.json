@@ -1,6 +1,6 @@
 {
   "target": {
-    "type": "screen",
-    "screenId": 3
+    "type": "window",
+    "windowId": 21130
   }
 }
