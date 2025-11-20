@@ -48,7 +48,16 @@ function App() {
         (window as any).electron.listDisplays(),
         (window as any).electron.getSettings(),
       ]);
-      setWindows(wins);
+
+      // Filter out windows with no title or very small dimensions (likely background/system windows)
+      const validWindows = wins.filter((w: WindowInfo) =>
+        w.name &&
+        w.name.trim() !== '' &&
+        w.bounds.Width > 50 &&
+        w.bounds.Height > 50
+      );
+
+      setWindows(validWindows);
       setDisplays(disps);
       setSettings(currentSettings);
 
@@ -95,13 +104,17 @@ function App() {
 
   return (
     <div className="container">
-      <h1>Spectra Settings</h1>
+      <h1>Spectra</h1>
 
       <div className="section">
-        <h2>Select Target</h2>
-        <button onClick={loadData}>Refresh List</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Capture Target</h2>
+          <button className="refresh-btn" onClick={loadData}>
+            Refresh List
+          </button>
+        </div>
 
-        <div className="lists-container" style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+        <div className="lists-container">
           <div className="list-group">
             <h3>Displays</h3>
             <div className="list">
@@ -109,7 +122,8 @@ function App() {
                 className={`item ${selectedDisplayId === 'main' ? 'selected' : ''}`}
                 onClick={() => handleDisplaySelect('main')}
               >
-                Main Display
+                <span className="item-name">Main Display</span>
+                <span className="item-meta">Primary</span>
               </div>
               {displays.map((disp) => (
                 <div
@@ -117,7 +131,8 @@ function App() {
                   className={`item ${selectedDisplayId === disp.id ? 'selected' : ''}`}
                   onClick={() => handleDisplaySelect(disp.id)}
                 >
-                  {disp.name} ({disp.width}x{disp.height})
+                  <span className="item-name">{disp.name}</span>
+                  <span className="item-meta">{disp.width}x{disp.height}</span>
                 </div>
               ))}
             </div>
@@ -132,7 +147,8 @@ function App() {
                   className={`item ${selectedWindowId === win.id ? 'selected' : ''}`}
                   onClick={() => handleWindowSelect(win.id)}
                 >
-                  [{win.ownerName}] {win.name || '(No Title)'}
+                  <span className="item-name">{win.name || '(No Title)'}</span>
+                  <span className="item-meta">{win.ownerName}</span>
                 </div>
               ))}
             </div>
@@ -141,8 +157,24 @@ function App() {
       </div>
 
       <div className="section">
-        <h2>Current Settings</h2>
-        <pre>{JSON.stringify(settings, null, 2)}</pre>
+        <h2>Current Status</h2>
+        <div className="status-card">
+          <div className="status-info">
+            <span className="status-label">Active Target</span>
+            <span className="status-value">
+              {settings?.target.type === 'screen'
+                ? `Display: ${settings.target.screenId === 'main' ? 'Main Display' : `ID ${settings.target.screenId}`}`
+                : settings?.target.type === 'window'
+                  ? `Window: ${windows.find(w => w.id === settings.target.windowId)?.ownerName || 'Unknown App'} (ID: ${settings.target.windowId})`
+                  : 'Not Configured'}
+            </span>
+          </div>
+          <div className="status-badge">
+            Active
+          </div>
+        </div>
+        {/* Debug info hidden but accessible if needed */}
+        {/* <pre style={{ fontSize: '0.7rem', opacity: 0.5 }}>{JSON.stringify(settings, null, 2)}</pre> */}
       </div>
     </div>
   );
