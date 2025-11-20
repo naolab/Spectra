@@ -77,15 +77,24 @@ struct SpectraCapture {
             }
             
             let name = dict[kCGWindowName as String] as? String ?? ""
+            let layer = dict[kCGWindowLayer as String] as? Int ?? 0
             
-            // Filter out some system windows if needed, but for now keep all
+            // Generate thumbnail
+            var thumbnail: String? = nil
+            if let windowId = CGWindowID(exactly: id) {
+                let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .bestResolution]
+                if let cgImage = CGWindowListCreateImage(.null, .optionIncludingWindow, windowId, imageOption) {
+                    thumbnail = generateThumbnailBase64(from: cgImage)
+                }
+            }
             
             return [
                 "id": id,
                 "ownerName": ownerName,
                 "name": name,
                 "bounds": bounds,
-                "layer": dict[kCGWindowLayer as String] ?? 0
+                "layer": layer,
+                "thumbnail": thumbnail ?? ""
             ]
         }
 
@@ -124,13 +133,20 @@ struct SpectraCapture {
             ]
             let isMain = CGDisplayIsMain(displayId) == 1
             
+            // Generate thumbnail
+            var thumbnail: String? = nil
+            if let cgImage = CGDisplayCreateImage(displayId) {
+                thumbnail = generateThumbnailBase64(from: cgImage)
+            }
+            
             displays.append([
                 "id": displayId,
                 "width": width,
                 "height": height,
                 "bounds": bounds,
                 "isMain": isMain,
-                "name": "Display \(i + 1)"
+                "name": "Display \(i + 1)",
+                "thumbnail": thumbnail ?? ""
             ])
         }
         
@@ -143,6 +159,29 @@ struct SpectraCapture {
             print("Error serializing JSON: \(error)")
             exit(1)
         }
+    }
+    
+    static func generateThumbnailBase64(from cgImage: CGImage) -> String? {
+        let maxDimension: CGFloat = 400 // Max width or height for thumbnail
+        let width = CGFloat(cgImage.width)
+        let height = CGFloat(cgImage.height)
+        
+        let scale = min(maxDimension / width, maxDimension / height)
+        let newWidth = width * scale
+        let newHeight = height * scale
+        
+        let newSize = NSSize(width: newWidth, height: newHeight)
+        let image = NSImage(cgImage: cgImage, size: NSSize(width: width, height: height))
+        
+        guard let resizedImage = image.resized(to: newSize) else { return nil }
+        
+        guard let tiffData = resizedImage.tiffRepresentation,
+              let bitmapRep = NSBitmapImageRep(data: tiffData),
+              let jpegData = bitmapRep.representation(using: .jpeg, properties: [.compressionFactor: 0.6]) else {
+            return nil
+        }
+        
+        return jpegData.base64EncodedString()
     }
 
     static func captureWindow(windowId: CGWindowID) {
@@ -195,3 +234,24 @@ struct SpectraCapture {
 
 // Helper for NSBitmapImageRep
 import AppKit
+
+extension NSImage {
+    func resized(to newSize: NSSize) -> NSImage? {
+        if let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: Int(newSize.width), pixelsHigh: Int(newSize.height),
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ) {
+            bitmapRep.size = newSize
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmapRep)
+            self.draw(in: NSRect(x: 0, y: 0, width: newSize.width, height: newSize.height), from: .zero, operation: .copy, fraction: 1.0)
+            NSGraphicsContext.restoreGraphicsState()
+            
+            let resizedImage = NSImage(size: newSize)
+            resizedImage.addRepresentation(bitmapRep)
+            return resizedImage
+        }
+        return nil
+    }
+}

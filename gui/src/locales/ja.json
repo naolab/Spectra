@@ -14,6 +14,11 @@
         "unknownDisplay": "不明なディスプレイ",
         "unknownWindow": "不明なウィンドウ",
         "unknownApp": "不明なアプリ",
-        "noTitle": "(タイトルなし)"
+        "noTitle": "(タイトルなし)",
+        "viewMode": "表示モード",
+        "list": "リスト",
+        "grid": "グリッド",
+        "apps": "アプリ",
+        "screens": "画面"
     }
 }
