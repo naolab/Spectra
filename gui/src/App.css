@@ -316,34 +316,67 @@ h1 {
 }
 
 .grid-item {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-color);
+  background: rgba(32, 34, 37, 0.6); /* Discord-like dark bg */
+  border: 2px solid transparent; /* Reserve space for border */
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .grid-item:hover {
+  background: rgba(47, 49, 54, 0.8);
   transform: translateY(-2px);
-  border-color: var(--accent-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .grid-item.selected {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  border-color: #3BA55C; /* Discord Green */
+  background: rgba(59, 165, 92, 0.1);
+}
+
+/* Selection Badge (Checkmark) */
+.grid-item.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #3BA55C;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .thumbnail-placeholder {
   aspect-ratio: 16/9;
-  background: rgba(0, 0, 0, 0.3);
+  background: #2F3136; /* Darker placeholder bg */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 3rem; /* Larger icon */
+  color: #72767D; /* Muted icon color */
+  transition: color 0.2s ease;
+}
+
+.grid-item:hover .thumbnail-placeholder {
+  color: #dcddde; /* Lighter icon on hover */
+}
+
+.thumbnail-image {
+  aspect-ratio: 16/9;
+  width: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .grid-item-info {
@@ -354,9 +387,9 @@ h1 {
 }
 
 .grid-item-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #DCDDDE; /* Light text */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -364,5 +397,8 @@ h1 {
 
 .grid-item-meta {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: #72767D; /* Muted text */
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
