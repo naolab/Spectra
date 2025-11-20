@@ -1,6 +1,19 @@
-# MCPサーバー セットアップガイド
+# Spectra MCPサーバー セットアップガイド
 
-## 1. MCPサーバーのビルド
+## 概要
+SpectraはAI（Claude）がローカルPCの画面を自動的に見ることができるツールです。
+MCP（Model Context Protocol）を使用して、AIと画面共有を実現します。
+
+## 前提条件
+- macOS（現在はmacOSのみ対応）
+- Node.js がインストールされていること
+- Claude Pro アカウント（MCPサーバー機能を使用するため）
+
+---
+
+## セットアップ手順
+
+### 1. MCPサーバーのビルド
 
 ```bash
 cd mcp-server
@@ -8,41 +21,77 @@ npm install
 npm run build
 ```
 
-## 2. Claude Desktopへの設定
+### 2. Claude CLIのインストール
 
-Claude Desktopの設定ファイルに以下を追加してください。
-
-### macOSの場合
-設定ファイルの場所: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "spectra": {
-      "command": "node",
-      "args": [
-        "/Users/nao/Desktop/develop/CLI 画面共有アプリ/Spectra/mcp-server/dist/index.js"
-      ]
-    }
-  }
-}
+```bash
+npm install -g @anthropic-ai/claude-cli
 ```
 
-**注意**: パスは絶対パスで指定してください。
+### 3. MCPサーバーの登録
 
-## 3. Claude Desktopの再起動
+```bash
+claude mcp add spectra node /Users/nao/Desktop/develop/CLI\ 画面共有アプリ/Spectra/mcp-server/dist/index.js
+```
 
-設定ファイルを保存したら、Claude Desktopを完全に終了して再起動してください。
+**注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
 
-## 4. 動作確認
+### 4. 登録確認
 
-Claude Desktopで以下のように話しかけてみてください：
+```bash
+claude mcp list
+```
 
-- 「画面を見て」
-- 「ウィンドウ一覧を教えて」
-- 「現在の設定を確認して」
+以下のように表示されればOK:
+```
+spectra: node /path/to/Spectra/mcp-server/dist/index.js - ✓ Connected
+```
 
-## 利用可能なツール
+---
+
+## 使い方
+
+### GUIアプリでキャプチャ対象を選択
+
+```bash
+cd gui
+npm run electron:dev
+```
+
+GUIアプリが起動したら：
+1. キャプチャしたいウィンドウまたは画面を選択
+2. 選択すると自動的に`settings.json`に保存される
+
+### Claude CLIで画面共有
+
+#### 対話モード（推奨）
+
+```bash
+claude
+```
+
+対話モードが起動したら、普通に会話できます：
+
+```
+> 画面を見て、何が表示されているか教えて
+> ウィンドウ一覧を教えて
+> 現在の設定を確認して
+> exit（終了）
+```
+
+#### ワンショットモード
+
+一度だけ質問したい場合：
+
+```bash
+claude "画面を見て"
+claude "ウィンドウ一覧を教えて"
+```
+
+---
+
+## 利用可能なMCPツール
+
+Claudeが自動的に以下のツールを使用します：
 
 - `screen_capture_latest`: 設定に基づいて画面をキャプチャ
 - `screen_list_windows`: ウィンドウ一覧を取得
@@ -51,14 +100,59 @@ Claude Desktopで以下のように話しかけてみてください：
 - `settings_get`: 現在の設定を取得
 - `settings_set`: 設定を更新
 
+---
+
 ## トラブルシューティング
 
 ### MCPサーバーが起動しない
-- Node.jsがインストールされているか確認
-- `npm run build`が成功しているか確認
-- パスが正しいか確認
+
+**確認事項**:
+- Node.jsがインストールされているか
+- `npm run build`が成功しているか
+- パスが正しいか（絶対パスで指定）
+
+**確認コマンド**:
+```bash
+claude mcp list
+```
 
 ### 画面キャプチャができない
-- macOSの「画面収録」権限が付与されているか確認
-  - システム設定 → プライバシーとセキュリティ → 画面収録
-- GUIアプリで対象ウィンドウ/画面を選択しているか確認
+
+**macOSの画面収録権限を確認**:
+1. システム設定 → プライバシーとセキュリティ → 画面収録
+2. `Terminal.app`（またはターミナルアプリ）に権限を付与
+
+**GUIアプリで対象を選択しているか確認**:
+```bash
+cat settings.json
+```
+
+設定が正しく保存されているか確認してください。
+
+### Claude CLIが見つからない
+
+```bash
+npm install -g @anthropic-ai/claude-cli
+```
+
+再インストールしてください。
+
+---
+
+## 配布・共有について
+
+他の人に配布する場合：
+
+1. **GUIアプリ + MCPサーバー**を配布
+2. **README（このファイル）**を同梱
+3. ユーザーは上記のセットアップ手順に従う
+4. **Claude Pro課金が必要**であることを明記
+
+---
+
+## 今後の拡張
+
+- Windows対応
+- Linux対応
+- OpenAI API対応（GPTでも使えるように）
+- REST API化（汎用的なHTTP APIとして提供）
