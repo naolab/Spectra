@@ -1,0 +1,19 @@
+{
+    "app": {
+        "title": "Spectra",
+        "captureTarget": "キャプチャ対象",
+        "refreshList": "リスト更新",
+        "displays": "ディスプレイ",
+        "windows": "ウィンドウ",
+        "currentStatus": "現在のステータス",
+        "activeTarget": "選択中のターゲット",
+        "active": "有効",
+        "notConfigured": "未設定",
+        "mainDisplay": "メインディスプレイ",
+        "primary": "プライマリ",
+        "unknownDisplay": "不明なディスプレイ",
+        "unknownWindow": "不明なウィンドウ",
+        "unknownApp": "不明なアプリ",
+        "noTitle": "(タイトルなし)"
+    }
+}

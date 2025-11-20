@@ -1,0 +1,19 @@
+{
+    "app": {
+        "title": "Spectra",
+        "captureTarget": "Objetivo de Captura",
+        "refreshList": "Actualizar Lista",
+        "displays": "Pantallas",
+        "windows": "Ventanas",
+        "currentStatus": "Estado Actual",
+        "activeTarget": "Objetivo Activo",
+        "active": "Activo",
+        "notConfigured": "No Configurado",
+        "mainDisplay": "Pantalla Principal",
+        "primary": "Primaria",
+        "unknownDisplay": "Pantalla Desconocida",
+        "unknownWindow": "Ventana Desconocida",
+        "unknownApp": "Aplicación Desconocida",
+        "noTitle": "(Sin Título)"
+    }
+}

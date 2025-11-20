@@ -1,0 +1,19 @@
+{
+    "app": {
+        "title": "Spectra",
+        "captureTarget": "捕获目标",
+        "refreshList": "刷新列表",
+        "displays": "显示器",
+        "windows": "窗口",
+        "currentStatus": "当前状态",
+        "activeTarget": "当前目标",
+        "active": "激活",
+        "notConfigured": "未配置",
+        "mainDisplay": "主显示器",
+        "primary": "主要",
+        "unknownDisplay": "未知显示器",
+        "unknownWindow": "未知窗口",
+        "unknownApp": "未知应用",
+        "noTitle": "(无标题)"
+    }
+}

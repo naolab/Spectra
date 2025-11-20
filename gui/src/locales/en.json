@@ -1,0 +1,19 @@
+{
+    "app": {
+        "title": "Spectra",
+        "captureTarget": "Capture Target",
+        "refreshList": "Refresh List",
+        "displays": "Displays",
+        "windows": "Windows",
+        "currentStatus": "Current Status",
+        "activeTarget": "Active Target",
+        "active": "Active",
+        "notConfigured": "Not Configured",
+        "mainDisplay": "Main Display",
+        "primary": "Primary",
+        "unknownDisplay": "Unknown Display",
+        "unknownWindow": "Unknown Window",
+        "unknownApp": "Unknown App",
+        "noTitle": "(No Title)"
+    }
+}

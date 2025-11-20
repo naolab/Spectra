@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './App.css';
 
 interface WindowInfo {
@@ -32,6 +33,7 @@ interface Settings {
 }
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [windows, setWindows] = useState<WindowInfo[]>([]);
   const [displays, setDisplays] = useState<DisplayInfo[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -106,28 +108,40 @@ function App() {
     }
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="container">
-      <h1>Spectra</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>{t('app.title')}</h1>
+        <div className="language-switcher">
+          <button onClick={() => changeLanguage('en')} className={i18n.language.startsWith('en') ? 'active' : ''}>EN</button>
+          <button onClick={() => changeLanguage('ja')} className={i18n.language.startsWith('ja') ? 'active' : ''}>JA</button>
+          <button onClick={() => changeLanguage('es')} className={i18n.language.startsWith('es') ? 'active' : ''}>ES</button>
+          <button onClick={() => changeLanguage('zh')} className={i18n.language.startsWith('zh') ? 'active' : ''}>ZH</button>
+        </div>
+      </div>
 
       <div className="section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2>Capture Target</h2>
+          <h2>{t('app.captureTarget')}</h2>
           <button className="refresh-btn" onClick={loadData}>
-            Refresh List
+            {t('app.refreshList')}
           </button>
         </div>
 
         <div className="lists-container">
           <div className="list-group">
-            <h3>Displays</h3>
+            <h3>{t('app.displays')}</h3>
             <div className="list">
               <div
                 className={`item ${selectedDisplayId === 'main' ? 'selected' : ''}`}
                 onClick={() => handleDisplaySelect('main')}
               >
-                <span className="item-name">Main Display</span>
-                <span className="item-meta">Primary</span>
+                <span className="item-name">{t('app.mainDisplay')}</span>
+                <span className="item-meta">{t('app.primary')}</span>
               </div>
               {displays.map((disp) => (
                 <div
@@ -143,7 +157,7 @@ function App() {
           </div>
 
           <div className="list-group">
-            <h3>Windows</h3>
+            <h3>{t('app.windows')}</h3>
             <div className="list">
               {windows.map((win) => (
                 <div
@@ -152,7 +166,7 @@ function App() {
                   onClick={() => handleWindowSelect(win.id)}
                 >
                   <span className="item-name">{win.name || win.ownerName}</span>
-                  <span className="item-meta">{win.name ? win.ownerName : ''}</span>
+                  <span className="item-meta">{win.name ? win.ownerName : t('app.noTitle')}</span>
                 </div>
               ))}
             </div>
@@ -161,35 +175,33 @@ function App() {
       </div>
 
       <div className="section">
-        <h2>Current Status</h2>
+        <h2>{t('app.currentStatus')}</h2>
         <div className="status-card">
           <div className="status-info">
-            <span className="status-label">Active Target</span>
+            <span className="status-label">{t('app.activeTarget')}</span>
             <span className="status-value">
               {(() => {
-                if (!settings?.target) return 'Not Configured';
+                if (!settings?.target) return t('app.notConfigured');
 
                 if (settings.target.type === 'screen') {
-                  if (settings.target.screenId === 'main') return 'Main Display';
+                  if (settings.target.screenId === 'main') return t('app.mainDisplay');
                   const disp = displays.find(d => d.id === Number(settings.target.screenId));
-                  return disp ? disp.name : 'Unknown Display';
+                  return disp ? disp.name : t('app.unknownDisplay');
                 }
 
                 if (settings.target.type === 'window') {
                   const win = windows.find(w => w.id === settings.target.windowId);
-                  return win ? `${win.ownerName} - ${win.name}` : 'Unknown Window';
+                  return win ? `${win.ownerName} - ${win.name}` : t('app.unknownWindow');
                 }
 
-                return 'Not Configured';
+                return t('app.notConfigured');
               })()}
             </span>
           </div>
           <div className="status-badge">
-            Active
+            {t('app.active')}
           </div>
         </div>
-        {/* Debug info hidden but accessible if needed */}
-        {/* <pre style={{ fontSize: '0.7rem', opacity: 0.5 }}>{JSON.stringify(settings, null, 2)}</pre> */}
       </div>
     </div>
   );
