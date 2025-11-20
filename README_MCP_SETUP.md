@@ -4,12 +4,13 @@
 SpectraはAI（Claude）がローカルPCの画面を自動的に見ることができるツールです。
 MCP（Model Context Protocol）を使用して、AIと画面共有を実現します。
 
-**対応しているClaude製品**:
+**対応しているAI製品**:
 - ✅ Claude CLI（ターミナル）
 - ✅ Claude Desktop（デスクトップアプリ）
 - ✅ Claude Code（VS Code拡張機能）
+- ✅ Gemini CLI（ターミナル）
 
-**注意**: 上記3つは同じ設定を共有します。一度設定すれば、すべてで使えます。
+**注意**: Claude製品（CLI/Desktop/Code）は同じ設定を共有します。Gemini CLIは別途設定が必要です。
 
 ## 前提条件
 - macOS（現在はmacOSのみ対応）
@@ -51,6 +52,35 @@ claude mcp list
 以下のように表示されればOK:
 ```
 spectra: node /path/to/Spectra/mcp-server/dist/index.js - ✓ Connected
+```
+
+### Gemini CLIのセットアップ（オプション）
+
+Gemini CLIでも使いたい場合：
+
+#### 1. Gemini CLIのインストール（未インストールの場合）
+
+```bash
+npm install -g @google/generative-ai-cli
+```
+
+#### 2. Spectra MCPサーバーを登録
+
+```bash
+gemini mcp add spectra node /Users/nao/Desktop/develop/CLI\ 画面共有アプリ/Spectra/mcp-server/dist/index.js
+```
+
+**注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
+
+#### 3. 登録確認
+
+```bash
+gemini mcp list
+```
+
+以下のように表示されればOK:
+```
+✓ spectra: node /path/to/Spectra/mcp-server/dist/index.js (stdio) - Connected
 ```
 
 ---
@@ -121,6 +151,32 @@ claude "ウィンドウ一覧を教えて"
    - 「ウィンドウ一覧を教えて」
 
 **注意**: `claude mcp add`で設定すれば、Claude CLI/Desktop/Code すべてで使えます。
+
+### Gemini CLIで画面共有
+
+#### 対話モード（推奨）
+
+```bash
+gemini
+```
+
+対話モードが起動したら、普通に会話できます：
+
+```
+> 画面を見て、何が表示されているか教えて
+> ウィンドウ一覧を教えて
+> 現在の設定を確認して
+> exit（終了）
+```
+
+#### ワンショットモード
+
+一度だけ質問したい場合：
+
+```bash
+gemini "画面を見て"
+gemini "ウィンドウ一覧を教えて"
+```
 
 ---
 
