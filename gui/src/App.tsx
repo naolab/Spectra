@@ -5,6 +5,7 @@ interface WindowInfo {
   id: number;
   name: string;
   ownerName: string;
+  layer: number;
   bounds: {
     X: number;
     Y: number;
@@ -50,11 +51,14 @@ function App() {
       ]);
 
       // Filter out windows with no title or very small dimensions (likely background/system windows)
+      // Exception: Allow windows with empty title if they are on layer 0 (main app windows)
       const validWindows = wins.filter((w: WindowInfo) =>
-        w.name &&
-        w.name.trim() !== '' &&
         w.bounds.Width > 50 &&
-        w.bounds.Height > 50
+        w.bounds.Height > 50 &&
+        (
+          (w.name && w.name.trim() !== '') ||
+          w.layer === 0
+        )
       );
 
       setWindows(validWindows);
@@ -147,8 +151,8 @@ function App() {
                   className={`item ${selectedWindowId === win.id ? 'selected' : ''}`}
                   onClick={() => handleWindowSelect(win.id)}
                 >
-                  <span className="item-name">{win.name || '(No Title)'}</span>
-                  <span className="item-meta">{win.ownerName}</span>
+                  <span className="item-name">{win.name || win.ownerName}</span>
+                  <span className="item-meta">{win.name ? win.ownerName : ''}</span>
                 </div>
               ))}
             </div>
