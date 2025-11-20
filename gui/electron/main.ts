@@ -60,7 +60,7 @@ app.on('window-all-closed', () => {
 // IPC Handlers
 ipcMain.handle('list-windows', async () => {
     try {
-        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_windows']);
+        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_windows'], { maxBuffer: 50 * 1024 * 1024 });
         return JSON.parse(stdout);
     } catch (error) {
         console.error('Failed to list windows:', error);
@@ -70,7 +70,7 @@ ipcMain.handle('list-windows', async () => {
 
 ipcMain.handle('list-displays', async () => {
     try {
-        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_displays']);
+        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_displays'], { maxBuffer: 50 * 1024 * 1024 });
         return JSON.parse(stdout);
     } catch (error) {
         console.error('Failed to list displays:', error);

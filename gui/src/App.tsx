@@ -13,6 +13,7 @@ interface WindowInfo {
     Width: number;
     Height: number;
   };
+  thumbnail?: string;
 }
 
 interface DisplayInfo {
@@ -21,6 +22,7 @@ interface DisplayInfo {
   height: number;
   name: string;
   isMain: boolean;
+  thumbnail?: string;
 }
 
 interface Settings {
@@ -54,7 +56,6 @@ function App() {
         (window as any).electron.listDisplays(),
         (window as any).electron.getSettings(),
       ]);
-
       // Filter out windows with no title or very small dimensions (likely background/system windows)
       // Exception: Allow windows with empty title if they are on layer 0 (main app windows)
       const validWindows = wins.filter((w: WindowInfo) =>
@@ -256,9 +257,13 @@ function App() {
                       className={`grid-item ${selectedDisplayId === disp.id ? 'selected' : ''}`}
                       onClick={() => handleDisplaySelect(disp.id)}
                     >
-                      <div className="thumbnail-placeholder">
-                        <span className="placeholder-icon">🖥️</span>
-                      </div>
+                      {disp.thumbnail ? (
+                        <img src={`data:image/jpeg;base64,${disp.thumbnail}`} alt={disp.name} className="thumbnail-image" />
+                      ) : (
+                        <div className="thumbnail-placeholder">
+                          <span className="placeholder-icon">🖥️</span>
+                        </div>
+                      )}
                       <div className="grid-item-info">
                         <span className="grid-item-name">{disp.name}</span>
                         <span className="grid-item-meta">{disp.width}x{disp.height}</span>
@@ -276,9 +281,13 @@ function App() {
                       className={`grid-item ${selectedWindowId === win.id ? 'selected' : ''}`}
                       onClick={() => handleWindowSelect(win.id)}
                     >
-                      <div className="thumbnail-placeholder">
-                        <span className="placeholder-icon">🪟</span>
-                      </div>
+                      {win.thumbnail ? (
+                        <img src={`data:image/jpeg;base64,${win.thumbnail}`} alt={win.name} className="thumbnail-image" />
+                      ) : (
+                        <div className="thumbnail-placeholder">
+                          <span className="placeholder-icon">🪟</span>
+                        </div>
+                      )}
                       <div className="grid-item-info">
                         <span className="grid-item-name">{win.name || win.ownerName}</span>
                         <span className="grid-item-meta">{win.name ? win.ownerName : t('app.noTitle')}</span>
