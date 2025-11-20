@@ -162,11 +162,22 @@ function App() {
           <div className="status-info">
             <span className="status-label">Active Target</span>
             <span className="status-value">
-              {settings?.target.type === 'screen'
-                ? `Display: ${settings.target.screenId === 'main' ? 'Main Display' : `ID ${settings.target.screenId}`}`
-                : settings?.target.type === 'window'
-                  ? `Window: ${windows.find(w => w.id === settings.target.windowId)?.ownerName || 'Unknown App'} (ID: ${settings.target.windowId})`
-                  : 'Not Configured'}
+              {(() => {
+                if (!settings?.target) return 'Not Configured';
+
+                if (settings.target.type === 'screen') {
+                  if (settings.target.screenId === 'main') return 'Main Display';
+                  const disp = displays.find(d => d.id === Number(settings.target.screenId));
+                  return disp ? disp.name : 'Unknown Display';
+                }
+
+                if (settings.target.type === 'window') {
+                  const win = windows.find(w => w.id === settings.target.windowId);
+                  return win ? `${win.ownerName} - ${win.name}` : 'Unknown Window';
+                }
+
+                return 'Not Configured';
+              })()}
             </span>
           </div>
           <div className="status-badge">
