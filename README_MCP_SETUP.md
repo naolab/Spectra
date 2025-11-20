@@ -4,6 +4,13 @@
 SpectraはAI（Claude）がローカルPCの画面を自動的に見ることができるツールです。
 MCP（Model Context Protocol）を使用して、AIと画面共有を実現します。
 
+**対応しているClaude製品**:
+- ✅ Claude CLI（ターミナル）
+- ✅ Claude Desktop（デスクトップアプリ）
+- ✅ Claude Code（VS Code拡張機能）
+
+**注意**: 上記3つは同じ設定を共有します。一度設定すれば、すべてで使えます。
+
 ## 前提条件
 - macOS（現在はmacOSのみ対応）
 - Node.js がインストールされていること
@@ -86,6 +93,34 @@ claude
 claude "画面を見て"
 claude "ウィンドウ一覧を教えて"
 ```
+
+### Claude Desktopで画面共有
+
+1. **Claude Desktopアプリを起動**
+   - https://claude.ai/download からダウンロード（未インストールの場合）
+   - アプリを起動（既にインストール済みの場合は再起動）
+
+2. **新しいチャットを開始**
+
+3. **普通に話しかける**
+   ```
+   画面を見て、何が表示されているか教えて
+   ウィンドウ一覧を教えて
+   現在の設定を確認して
+   ```
+
+### Claude Code（VS Code拡張）で画面共有
+
+1. **VS Codeで Claude Code 拡張機能を開く**
+   - サイドバーのClaudeアイコンをクリック
+
+2. **新しいチャットを開始**
+
+3. **普通に話しかける**
+   - 「画面を見て」
+   - 「ウィンドウ一覧を教えて」
+
+**注意**: `claude mcp add`で設定すれば、Claude CLI/Desktop/Code すべてで使えます。
 
 ---
 
