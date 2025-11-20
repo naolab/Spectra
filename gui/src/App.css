@@ -5,38 +5,74 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.section {
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.lists-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  text-align: left;
 }
 
-.card {
-  padding: 2em;
+.list-group {
+  flex: 1;
+  max-width: 400px;
 }
 
-.read-the-docs {
-  color: #888;
+.list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.item:hover {
+  background-color: #f0f0f0;
+}
+
+.item.selected {
+  background-color: #e6f7ff;
+  border-left: 4px solid #1890ff;
+}
+
+button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+button:hover {
+  background-color: #40a9ff;
+}
+
+pre {
+  text-align: left;
+  background: #333;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
 }

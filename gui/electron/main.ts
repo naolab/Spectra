@@ -69,6 +69,16 @@ ipcMain.handle('list-windows', async () => {
     }
 });
 
+ipcMain.handle('list-displays', async () => {
+    try {
+        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_displays']);
+        return JSON.parse(stdout);
+    } catch (error) {
+        console.error('Failed to list displays:', error);
+        return [];
+    }
+});
+
 ipcMain.handle('get-settings', async () => {
     try {
         const data = await fs.readFile(SETTINGS_PATH, 'utf-8');

@@ -17,6 +17,8 @@ struct SpectraCapture {
         switch command {
         case "list_windows":
             listWindows()
+        case "list_displays":
+            listDisplays()
         case "capture_window":
             guard args.count > 2, let windowId = CGWindowID(args[2]) else {
                 print("Error: Missing or invalid window ID")
@@ -53,6 +55,7 @@ struct SpectraCapture {
         Usage: spectra-capture <command> [args...]
         Commands:
           list_windows
+          list_displays
           capture_window <windowId>
           capture_display [displayId]
           capture_region <x> <y> <w> <h>
@@ -88,6 +91,51 @@ struct SpectraCapture {
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: windows, options: .prettyPrinted)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+            exit(1)
+        }
+    }
+
+    static func listDisplays() {
+        var displayCount: UInt32 = 0
+        var activeDisplays = [CGDirectDisplayID](repeating: 0, count: 10) // Max 10 displays
+        
+        let result = CGGetActiveDisplayList(UInt32(activeDisplays.count), &activeDisplays, &displayCount)
+        
+        guard result == .success else {
+            print("[]")
+            return
+        }
+        
+        var displays: [[String: Any]] = []
+        for i in 0..<Int(displayCount) {
+            let displayId = activeDisplays[i]
+            let width = CGDisplayPixelsWide(displayId)
+            let height = CGDisplayPixelsHigh(displayId)
+            let bounds = [
+                "X": CGDisplayBounds(displayId).origin.x,
+                "Y": CGDisplayBounds(displayId).origin.y,
+                "Width": Double(width),
+                "Height": Double(height)
+            ]
+            let isMain = CGDisplayIsMain(displayId) == 1
+            
+            displays.append([
+                "id": displayId,
+                "width": width,
+                "height": height,
+                "bounds": bounds,
+                "isMain": isMain,
+                "name": "Display \(i + 1)"
+            ])
+        }
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: displays, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 print(jsonString)
             }
