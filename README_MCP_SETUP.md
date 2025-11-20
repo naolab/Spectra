@@ -9,8 +9,9 @@ MCP（Model Context Protocol）を使用して、AIと画面共有を実現し�
 - ✅ Claude Desktop（デスクトップアプリ）
 - ✅ Claude Code（VS Code拡張機能）
 - ✅ Gemini CLI（ターミナル）
+- ✅ Codex CLI（ターミナル）
 
-**注意**: Claude製品（CLI/Desktop/Code）は同じ設定を共有します。Gemini CLIは別途設定が必要です。
+**注意**: Claude製品（CLI/Desktop/Code）は同じ設定を共有します。Gemini CLI と Codex CLI は別途設定が必要です。
 
 ## 前提条件
 - macOS（現在はmacOSのみ対応）
@@ -82,6 +83,57 @@ gemini mcp list
 ```
 ✓ spectra: node /path/to/Spectra/mcp-server/dist/index.js (stdio) - Connected
 ```
+
+### Codex CLIのセットアップ（オプション）
+
+Codex CLIでも使いたい場合：
+
+#### 1. Codex CLIのインストール（未インストールの場合）
+
+公式サイトからインストール：
+https://developers.openai.com/codex/
+
+#### 2. 設定ファイルを編集
+
+Codex CLIは`config.toml`を手動で編集する必要があります。
+
+```bash
+# 設定ファイルを開く
+open ~/.codex/config.toml
+```
+
+または、エディタで直接編集：
+
+```bash
+nano ~/.codex/config.toml
+```
+
+以下を**ファイルの末尾に追加**：
+
+```toml
+[mcp_servers.spectra]
+command = "node"
+args = ["/Users/nao/Desktop/develop/CLI 画面共有アプリ/Spectra/mcp-server/dist/index.js"]
+```
+
+**注意**: `args`のパスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
+
+#### 3. 動作確認
+
+Codex CLIを起動：
+
+```bash
+codex
+```
+
+起動したら、以下のように話しかけてみてください：
+
+```
+> ウィンドウ一覧を教えて
+> 画面を見て、何が表示されているか教えて
+```
+
+MCPサーバーが正しく設定されていれば、Codexが自動的にSpectraのツールを使います。
 
 ---
 
@@ -177,6 +229,35 @@ gemini
 gemini "画面を見て"
 gemini "ウィンドウ一覧を教えて"
 ```
+
+### Codex CLIで画面共有
+
+#### 対話モード（推奨）
+
+```bash
+codex
+```
+
+対話モードが起動したら、普通に会話できます：
+
+```
+> 画面を見て、何が表示されているか教えて
+> ウィンドウ一覧を教えて
+> 現在の設定を確認して
+```
+
+**注意**: Codexは自動的にSpectraのツールを使います。`/mcp`コマンドは古いバージョンでは使えない場合があります。
+
+#### ワンショットモード
+
+一度だけ質問したい場合：
+
+```bash
+codex "画面を見て"
+codex "ウィンドウ一覧を教えて"
+```
+
+**注意**: Codexはコンテキストウィンドウが小さいため、画面キャプチャ（`screen_capture_latest`）を使うとエラーが出る場合があります。ウィンドウ一覧の取得など、画像を含まないツールは正常に動作します。
 
 ---
 
