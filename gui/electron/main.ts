@@ -20,7 +20,7 @@ const SWIFT_BINARY_PATH = isDev
     ? path.resolve(PROJECT_ROOT, 'capture/mac/.build/debug/mac')
     : path.join(process.resourcesPath, 'mac'); // TODO: Verify prod path
 
-const SETTINGS_PATH = path.resolve(PROJECT_ROOT, 'settings.json');
+const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -89,6 +89,7 @@ ipcMain.handle('get-settings', async () => {
 
 ipcMain.handle('save-settings', async (event, settings) => {
     try {
+        await fs.mkdir(path.dirname(SETTINGS_PATH), { recursive: true });
         await fs.writeFile(SETTINGS_PATH, JSON.stringify(settings, null, 2));
         return true;
     } catch (error) {

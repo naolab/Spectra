@@ -1,9 +1,31 @@
 {
-  "name": "gui",
+  "name": "spectra",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "main": "dist-electron/main.js",
+  "build": {
+    "appId": "com.spectra.app",
+    "productName": "Spectra",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "identity": null,
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../capture/mac/.build/release/mac",
+        "to": "mac"
+      }
+    ]
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && npm run electron:build",

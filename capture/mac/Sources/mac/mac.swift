@@ -79,10 +79,26 @@ struct SpectraCapture {
             let name = dict[kCGWindowName as String] as? String ?? ""
             let layer = dict[kCGWindowLayer as String] as? Int ?? 0
             
+            // Filter out small windows or windows without title (unless layer 0)
+            // This matches the logic in App.tsx to avoid unnecessary captures
+            let widthNum = bounds["Width"] as? NSNumber
+            let heightNum = bounds["Height"] as? NSNumber
+            let width = widthNum?.doubleValue ?? 0
+            let height = heightNum?.doubleValue ?? 0
+            let hasTitle = !name.trimmingCharacters(in: .whitespaces).isEmpty
+            
+            // Debug print (to stderr so it doesn't break JSON)
+            // fputs("Window \(id): \(name) (\(width)x\(height))\n", stderr)
+            
+            if width <= 50 || height <= 50 || (!hasTitle && layer != 0) {
+                return nil
+            }
+            
             // Generate thumbnail
             var thumbnail: String? = nil
             if let windowId = CGWindowID(exactly: id) {
-                let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .bestResolution]
+                // Use nominalResolution instead of bestResolution for thumbnails to save CPU
+                let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .nominalResolution]
                 if let cgImage = CGWindowListCreateImage(.null, .optionIncludingWindow, windowId, imageOption) {
                     thumbnail = generateThumbnailBase64(from: cgImage)
                 }
@@ -97,6 +113,8 @@ struct SpectraCapture {
                 "thumbnail": thumbnail ?? ""
             ]
         }
+        
+        // fputs("Found \(windows.count) windows after filtering\n", stderr)
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: windows, options: .prettyPrinted)

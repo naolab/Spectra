@@ -27,7 +27,8 @@ const __dirname = path.dirname(__filename);
 // Binary is in capture/mac/.build/debug/mac
 const PROJECT_ROOT = path.resolve(__dirname, "../.."); // dist -> mcp-server -> Spectra
 const SWIFT_BINARY_PATH = path.resolve(PROJECT_ROOT, "capture/mac/.build/debug/mac");
-const SETTINGS_PATH = path.resolve(PROJECT_ROOT, "settings.json");
+const HOME_DIR = process.env.HOME || "";
+const SETTINGS_PATH = path.join(HOME_DIR, "Library/Application Support/Spectra/settings.json");
 
 interface Settings {
     target: {
@@ -200,6 +201,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 // Merge with existing settings
                 const currentSettings = await readSettings();
                 const updatedSettings = { ...currentSettings, ...newSettings };
+                await fs.mkdir(path.dirname(SETTINGS_PATH), { recursive: true });
                 await fs.writeFile(SETTINGS_PATH, JSON.stringify(updatedSettings, null, 2));
                 return {
                     content: [
