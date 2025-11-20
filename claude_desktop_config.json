@@ -1,0 +1,10 @@
+{
+    "mcpServers": {
+        "spectra": {
+            "command": "node",
+            "args": [
+                "/Users/nao/Desktop/develop/CLI 画面共有アプリ/Spectra/mcp-server/dist/index.js"
+            ]
+        }
+    }
+}
