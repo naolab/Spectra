@@ -11,8 +11,11 @@ const __dirname = path.dirname(__filename);
 const execFileAsync = promisify(execFile);
 
 // Helper to run capture command
-const runCaptureCommand = async (command: string, args: string[] = []): Promise<string> => {
-    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args], { maxBuffer: 50 * 1024 * 1024 });
+const runCaptureCommand = async (command: string, args: string[] = [], timeout: number = 30000): Promise<string> => {
+    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args], {
+        maxBuffer: 50 * 1024 * 1024,
+        timeout: timeout
+    });
     return stdout;
 };
 
@@ -86,10 +89,19 @@ ipcMain.handle('list-displays', async () => {
 
 ipcMain.handle('get-window-thumbnail', async (_event, windowId: number) => {
     try {
+        const startTime = Date.now();
         console.log(`[IPC] Requesting thumbnail for window ${windowId}`);
-        const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()]);
+
+        const cmdStart = Date.now();
+        const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()], 500); // 500ms timeout
+        const cmdDuration = Date.now() - cmdStart;
+
+        const parseStart = Date.now();
         const result = JSON.parse(stdout);
-        console.log(`[IPC] Got thumbnail for window ${windowId}, length: ${result.thumbnail?.length}`);
+        const parseDuration = Date.now() - parseStart;
+
+        const totalDuration = Date.now() - startTime;
+        console.log(`[IPC] Got thumbnail for window ${windowId}, length: ${result.thumbnail?.length}, cmd: ${cmdDuration}ms, parse: ${parseDuration}ms, total: ${totalDuration}ms`);
         return result;
     } catch (error) {
         console.error(`Failed to get thumbnail for window ${windowId}:`, error);
