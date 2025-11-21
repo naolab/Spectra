@@ -90,7 +90,20 @@ struct SpectraCapture {
             // Debug print (to stderr so it doesn't break JSON)
             // fputs("Window \(id): \(name) (\(width)x\(height))\n", stderr)
             
-            if width <= 50 || height <= 50 || (!hasTitle && layer != 0) {
+            // Exclude known system windows that are not useful for screen sharing
+            let excludedOwners = [
+                "Window Server", 
+                "Control Center", 
+                "Notification Center", 
+                "SystemUIServer", 
+                "CursorUIViewService", 
+                "Dock", 
+                "Siri", 
+                "Talagent",
+                "Spotlight"
+            ]
+            
+            if width <= 50 || height <= 50 || (!hasTitle && layer != 0) || excludedOwners.contains(ownerName) {
                 return nil
             }
             
