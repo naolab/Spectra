@@ -44,6 +44,7 @@ function App() {
 
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [activeTab, setActiveTab] = useState<'apps' | 'screens'>('apps');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -61,6 +62,7 @@ function App() {
 
         setWindows(wins);
         setDisplays(disps);
+        setRefreshTrigger(prev => prev + 1); // Trigger thumbnail reload
         if (currentSettings) {
           setSettings(currentSettings);
           if (currentSettings.target) {
@@ -154,7 +156,7 @@ function App() {
     return () => {
       isMounted = false;
     };
-  }, [windows.length, displays.length]); // Only trigger when count changes (initial load)
+  }, [refreshTrigger]); // Trigger on refresh
 
 
 
