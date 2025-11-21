@@ -29,7 +29,7 @@ interface Settings {
   target: {
     type: 'window' | 'screen' | 'region';
     windowId?: number;
-    screenId?: number | 'main'; // Updated type to include 'main'
+    screenId?: number;
     region?: { x: number; y: number; width: number; height: number };
   };
 }
@@ -40,7 +40,7 @@ function App() {
   const [displays, setDisplays] = useState<DisplayInfo[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [selectedWindowId, setSelectedWindowId] = useState<number | null>(null);
-  const [selectedDisplayId, setSelectedDisplayId] = useState<number | 'main' | null>(null);
+  const [selectedDisplayId, setSelectedDisplayId] = useState<number | null>(null);
 
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [activeTab, setActiveTab] = useState<'apps' | 'screens'>('apps');
@@ -68,7 +68,7 @@ function App() {
               setSelectedWindowId(currentSettings.target.windowId);
               setSelectedDisplayId(null);
             } else if (currentSettings.target.type === 'screen') {
-              setSelectedDisplayId(currentSettings.target.screenId === 'main' ? 'main' : Number(currentSettings.target.screenId));
+              setSelectedDisplayId(currentSettings.target.screenId ?? null);
               setSelectedWindowId(null);
             }
           }
@@ -173,7 +173,7 @@ function App() {
     }
   };
 
-  const handleDisplaySelect = async (displayId: number | 'main') => {
+  const handleDisplaySelect = async (displayId: number) => {
     setSelectedDisplayId(displayId);
     setSelectedWindowId(null);
     const newSettings: Settings = {
@@ -275,20 +275,13 @@ function App() {
               <div className="list-group">
                 <h3>{t('app.displays')}</h3>
                 <div className="list">
-                  <div
-                    className={`item ${selectedDisplayId === 'main' ? 'selected' : ''}`}
-                    onClick={() => handleDisplaySelect('main')}
-                  >
-                    <span className="item-name">{t('app.mainDisplay')}</span>
-                    <span className="item-meta">{t('app.primary')}</span>
-                  </div>
                   {displays.map((disp) => (
                     <div
                       key={disp.id}
                       className={`item ${selectedDisplayId === disp.id ? 'selected' : ''}`}
                       onClick={() => handleDisplaySelect(disp.id)}
                     >
-                      <span className="item-name">{disp.name}</span>
+                      <span className="item-name">{disp.name}{disp.isMain ? ' (Main)' : ''}</span>
                       <span className="item-meta">{disp.width}x{disp.height}</span>
                     </div>
                   ))}
@@ -315,22 +308,6 @@ function App() {
             <div className="grid-container">
               {activeTab === 'screens' && (
                 <div className="grid">
-                  <div
-                    className={`grid-item ${selectedDisplayId === 'main' ? 'selected' : ''}`}
-                    onClick={() => handleDisplaySelect('main')}
-                  >
-                    <div className="thumbnail-placeholder">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                      </svg>
-                    </div>
-                    <div className="grid-item-info">
-                      <span className="grid-item-name">{t('app.mainDisplay')}</span>
-                      <span className="grid-item-meta">{t('app.primary')}</span>
-                    </div>
-                  </div>
                   {displays.map((disp) => (
                     <div
                       key={disp.id}
@@ -349,7 +326,7 @@ function App() {
                         </div>
                       )}
                       <div className="grid-item-info">
-                        <span className="grid-item-name">{disp.name}</span>
+                        <span className="grid-item-name">{disp.name}{disp.isMain ? ' (Main)' : ''}</span>
                         <span className="grid-item-meta">{disp.width}x{disp.height}</span>
                       </div>
                     </div>
@@ -406,9 +383,8 @@ function App() {
                 if (!settings?.target) return t('app.notConfigured');
 
                 if (settings.target.type === 'screen') {
-                  if (settings.target.screenId === 'main') return t('app.mainDisplay');
-                  const disp = displays.find(d => d.id === Number(settings.target.screenId));
-                  return disp ? disp.name : t('app.unknownDisplay');
+                  const disp = displays.find(d => d.id === settings.target.screenId);
+                  return disp ? `${disp.name}${disp.isMain ? ' (Main)' : ''}` : t('app.unknownDisplay');
                 }
 
                 if (settings.target.type === 'window') {
