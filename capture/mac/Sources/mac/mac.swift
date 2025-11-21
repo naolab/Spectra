@@ -215,15 +215,21 @@ struct SpectraCapture {
     
     static func getDisplayThumbnail(displayId: CGDirectDisplayID) {
         var thumbnail: String? = nil
-        if let cgImage = CGDisplayCreateImage(displayId) {
+
+        // Get display bounds
+        let bounds = CGDisplayBounds(displayId)
+
+        // Capture all windows on this display (including wallpaper and apps)
+        // Using CGWindowListCreateImage instead of CGDisplayCreateImage to capture everything
+        if let cgImage = CGWindowListCreateImage(bounds, .optionOnScreenOnly, kCGNullWindowID, .bestResolution) {
             thumbnail = generateThumbnailBase64(from: cgImage)
         }
-        
+
         let result = [
             "id": displayId,
             "thumbnail": thumbnail ?? ""
         ] as [String : Any]
-        
+
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
             if let jsonString = String(data: jsonData, encoding: .utf8) {
