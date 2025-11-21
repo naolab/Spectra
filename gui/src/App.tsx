@@ -51,33 +51,62 @@ function App() {
 
   const loadData = async () => {
     if ((window as any).electron) {
-      const [wins, disps, currentSettings] = await Promise.all([
-        (window as any).electron.listWindows(),
-        (window as any).electron.listDisplays(),
-        (window as any).electron.getSettings(),
-      ]);
-      // Filter out windows with no title or very small dimensions (likely background/system windows)
-      // Exception: Allow windows with empty title if they are on layer 0 (main app windows)
-      const validWindows = wins.filter((w: WindowInfo) =>
-        w.bounds.Width > 50 &&
-        w.bounds.Height > 50 &&
-        (
-          (w.name && w.name.trim() !== '') ||
-          w.layer === 0
-        )
-      );
+      try {
+        // 1. Fetch lists (fast, no thumbnails)
+        const [wins, disps, currentSettings] = await Promise.all([
+          (window as any).electron.listWindows(),
+          (window as any).electron.listDisplays(),
+          (window as any).electron.getSettings(),
+        ]);
 
-      setWindows(validWindows);
-      setDisplays(disps);
-      setSettings(currentSettings);
+        setWindows(wins);
+        setDisplays(disps);
+        if (currentSettings) {
+          setSettings(currentSettings);
+          if (currentSettings.target) {
+            if (currentSettings.target.type === 'window') {
+              setSelectedWindowId(currentSettings.target.windowId);
+              setSelectedDisplayId(null);
+            } else if (currentSettings.target.type === 'screen') {
+              setSelectedDisplayId(currentSettings.target.screenId === 'main' ? 'main' : Number(currentSettings.target.screenId));
+              setSelectedWindowId(null);
+            }
+          }
+        }
 
-      if (currentSettings.target.type === 'window') {
-        setSelectedWindowId(currentSettings.target.windowId || null);
-        setSelectedDisplayId(null);
-      } else if (currentSettings.target.type === 'screen') {
-        const screenId = currentSettings.target.screenId;
-        setSelectedDisplayId(screenId === 'main' ? 'main' : (screenId !== undefined ? parseInt(screenId as string) : null));
-        setSelectedWindowId(null);
+        // 2. Lazy load thumbnails
+        loadThumbnails(wins, disps);
+
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      }
+    }
+  };
+
+  const loadThumbnails = async (wins: WindowInfo[], disps: DisplayInfo[]) => {
+    if (!(window as any).electron) return;
+
+    // Fetch window thumbnails
+    for (const win of wins) {
+      try {
+        const result = await (window as any).electron.getWindowThumbnail(win.id);
+        if (result && result.thumbnail) {
+          setWindows(prev => prev.map(w => w.id === win.id ? { ...w, thumbnail: result.thumbnail } : w));
+        }
+      } catch (e) {
+        console.error(`Failed to load thumbnail for window ${win.id}`, e);
+      }
+    }
+
+    // Fetch display thumbnails
+    for (const disp of disps) {
+      try {
+        const result = await (window as any).electron.getDisplayThumbnail(disp.id);
+        if (result && result.thumbnail) {
+          setDisplays(prev => prev.map(d => d.id === disp.id ? { ...d, thumbnail: result.thumbnail } : d));
+        }
+      } catch (e) {
+        console.error(`Failed to load thumbnail for display ${disp.id}`, e);
       }
     }
   };

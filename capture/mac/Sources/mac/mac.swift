@@ -19,6 +19,18 @@ struct SpectraCapture {
             listWindows()
         case "list_displays":
             listDisplays()
+        case "get_window_thumbnail":
+            guard args.count > 2, let windowId = CGWindowID(args[2]) else {
+                print("Error: Missing or invalid window ID")
+                exit(1)
+            }
+            getWindowThumbnail(windowId: windowId)
+        case "get_display_thumbnail":
+            guard args.count > 2, let displayId = UInt32(args[2]) else {
+                print("Error: Missing or invalid display ID")
+                exit(1)
+            }
+            getDisplayThumbnail(displayId: displayId)
         case "capture_window":
             guard args.count > 2, let windowId = CGWindowID(args[2]) else {
                 print("Error: Missing or invalid window ID")
@@ -56,6 +68,8 @@ struct SpectraCapture {
         Commands:
           list_windows
           list_displays
+          get_window_thumbnail <windowId>
+          get_display_thumbnail <displayId>
           capture_window <windowId>
           capture_display [displayId]
           capture_region <x> <y> <w> <h>
@@ -87,9 +101,6 @@ struct SpectraCapture {
             let height = heightNum?.doubleValue ?? 0
             let hasTitle = !name.trimmingCharacters(in: .whitespaces).isEmpty
             
-            // Debug print (to stderr so it doesn't break JSON)
-            // fputs("Window \(id): \(name) (\(width)x\(height))\n", stderr)
-            
             // Exclude known system windows that are not useful for screen sharing
             let excludedOwners = [
                 "Window Server", 
@@ -107,15 +118,7 @@ struct SpectraCapture {
                 return nil
             }
             
-            // Generate thumbnail
-            var thumbnail: String? = nil
-            if let windowId = CGWindowID(exactly: id) {
-                // Use nominalResolution instead of bestResolution for thumbnails to save CPU
-                let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .nominalResolution]
-                if let cgImage = CGWindowListCreateImage(.null, .optionIncludingWindow, windowId, imageOption) {
-                    thumbnail = generateThumbnailBase64(from: cgImage)
-                }
-            }
+            // NOTE: Thumbnail generation removed for lazy loading
             
             return [
                 "id": id,
@@ -123,12 +126,10 @@ struct SpectraCapture {
                 "name": name,
                 "bounds": bounds,
                 "layer": layer,
-                "thumbnail": thumbnail ?? ""
+                "thumbnail": "" // Empty thumbnail for lazy loading
             ]
         }
         
-        // fputs("Found \(windows.count) windows after filtering\n", stderr)
-
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: windows, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -164,11 +165,7 @@ struct SpectraCapture {
             ]
             let isMain = CGDisplayIsMain(displayId) == 1
             
-            // Generate thumbnail
-            var thumbnail: String? = nil
-            if let cgImage = CGDisplayCreateImage(displayId) {
-                thumbnail = generateThumbnailBase64(from: cgImage)
-            }
+            // NOTE: Thumbnail generation removed for lazy loading
             
             displays.append([
                 "id": displayId,
@@ -177,12 +174,58 @@ struct SpectraCapture {
                 "bounds": bounds,
                 "isMain": isMain,
                 "name": "Display \(i + 1)",
-                "thumbnail": thumbnail ?? ""
+                "thumbnail": "" // Empty thumbnail for lazy loading
             ])
         }
         
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: displays, options: .prettyPrinted)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+            exit(1)
+        }
+    }
+    
+    static func getWindowThumbnail(windowId: CGWindowID) {
+        var thumbnail: String? = nil
+        // Use nominalResolution for thumbnails to save CPU
+        let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .nominalResolution]
+        if let cgImage = CGWindowListCreateImage(.null, .optionIncludingWindow, windowId, imageOption) {
+            thumbnail = generateThumbnailBase64(from: cgImage)
+        }
+        
+        let result = [
+            "id": windowId,
+            "thumbnail": thumbnail ?? ""
+        ] as [String : Any]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+            exit(1)
+        }
+    }
+    
+    static func getDisplayThumbnail(displayId: CGDirectDisplayID) {
+        var thumbnail: String? = nil
+        if let cgImage = CGDisplayCreateImage(displayId) {
+            thumbnail = generateThumbnailBase64(from: cgImage)
+        }
+        
+        let result = [
+            "id": displayId,
+            "thumbnail": thumbnail ?? ""
+        ] as [String : Any]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 print(jsonString)
             }

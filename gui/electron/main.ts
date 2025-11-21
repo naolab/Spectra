@@ -10,6 +10,12 @@ const __dirname = path.dirname(__filename);
 
 const execFileAsync = promisify(execFile);
 
+// Helper to run capture command
+const runCaptureCommand = async (command: string, args: string[] = []): Promise<string> => {
+    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args], { maxBuffer: 50 * 1024 * 1024 });
+    return stdout;
+};
+
 // Path to Swift binary
 // In dev: ../capture/mac/.build/debug/mac (relative to gui root)
 // In prod: resources/mac (or similar)
@@ -60,7 +66,7 @@ app.on('window-all-closed', () => {
 // IPC Handlers
 ipcMain.handle('list-windows', async () => {
     try {
-        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_windows'], { maxBuffer: 50 * 1024 * 1024 });
+        const stdout = await runCaptureCommand('list_windows');
         return JSON.parse(stdout);
     } catch (error) {
         console.error('Failed to list windows:', error);
@@ -70,11 +76,31 @@ ipcMain.handle('list-windows', async () => {
 
 ipcMain.handle('list-displays', async () => {
     try {
-        const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ['list_displays'], { maxBuffer: 50 * 1024 * 1024 });
+        const stdout = await runCaptureCommand('list_displays');
         return JSON.parse(stdout);
     } catch (error) {
         console.error('Failed to list displays:', error);
         return [];
+    }
+});
+
+ipcMain.handle('get-window-thumbnail', async (_event, windowId: number) => {
+    try {
+        const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()]);
+        return JSON.parse(stdout);
+    } catch (error) {
+        console.error(`Failed to get thumbnail for window ${windowId}:`, error);
+        return { id: windowId, thumbnail: '' };
+    }
+});
+
+ipcMain.handle('get-display-thumbnail', async (_event, displayId: number) => {
+    try {
+        const stdout = await runCaptureCommand('get_display_thumbnail', [displayId.toString()]);
+        return JSON.parse(stdout);
+    } catch (error) {
+        console.error(`Failed to get thumbnail for display ${displayId}:`, error);
+        return { id: displayId, thumbnail: '' };
     }
 });
 
