@@ -97,8 +97,8 @@ function App() {
       if (windowsNeedingThumbnails.length > 0) {
         console.log(`Loading thumbnails for ${windowsNeedingThumbnails.length} windows...`);
 
-        // Process in chunks of 5 to avoid overwhelming the backend/UI
-        const chunkSize = 5;
+        // Process one at a time to avoid overwhelming the backend/UI
+        const chunkSize = 1;
         for (let i = 0; i < windowsNeedingThumbnails.length; i += chunkSize) {
           if (!isMounted) return;
 

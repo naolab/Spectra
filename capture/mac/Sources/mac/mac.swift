@@ -103,15 +103,16 @@ struct SpectraCapture {
             
             // Exclude known system windows that are not useful for screen sharing
             let excludedOwners = [
-                "Window Server", 
-                "Control Center", 
-                "Notification Center", 
-                "SystemUIServer", 
-                "CursorUIViewService", 
-                "Dock", 
-                "Siri", 
+                "Window Server",
+                "Control Center",
+                "Notification Center",
+                "SystemUIServer",
+                "CursorUIViewService",
+                "Dock",
+                "Siri",
                 "Talagent",
-                "Spotlight"
+                "Spotlight",
+                "Electron" // Exclude self to avoid capture issues
             ]
             
             if width <= 50 || height <= 50 || (!hasTitle && layer != 0) || excludedOwners.contains(ownerName) {
