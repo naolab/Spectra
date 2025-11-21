@@ -22,9 +22,9 @@ const runCaptureCommand = async (command: string, args: string[] = []): Promise<
 const isDev = process.env.NODE_ENV === 'development';
 const PROJECT_ROOT = path.resolve(__dirname, '../..'); // gui/dist-electron -> gui -> Spectra
 
-const SWIFT_BINARY_PATH = isDev
-    ? path.resolve(PROJECT_ROOT, 'capture/mac/.build/debug/mac')
-    : path.join(process.resourcesPath, 'mac'); // TODO: Verify prod path
+const SWIFT_BINARY_PATH = app.isPackaged
+    ? path.join(process.resourcesPath, 'mac') // TODO: Verify prod path
+    : path.join(__dirname, '../../capture/mac/.build/release/mac');
 
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
 
@@ -86,8 +86,11 @@ ipcMain.handle('list-displays', async () => {
 
 ipcMain.handle('get-window-thumbnail', async (_event, windowId: number) => {
     try {
+        console.log(`[IPC] Requesting thumbnail for window ${windowId}`);
         const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()]);
-        return JSON.parse(stdout);
+        const result = JSON.parse(stdout);
+        console.log(`[IPC] Got thumbnail for window ${windowId}, length: ${result.thumbnail?.length}`);
+        return result;
     } catch (error) {
         console.error(`Failed to get thumbnail for window ${windowId}:`, error);
         return { id: windowId, thumbnail: '' };

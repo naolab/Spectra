@@ -13,7 +13,11 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "extendInfo": {
+        "NSScreenCaptureUsageDescription": "This app needs access to record the screen to generate thumbnails and share content.",
+        "NSDesktopFolderUsageDescription": "This app needs access to the desktop folder to save screenshots."
+      }
     },
     "files": [
       "dist/**/*",

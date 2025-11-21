@@ -74,8 +74,8 @@ function App() {
           }
         }
 
-        // 2. Lazy load thumbnails
-        loadThumbnails(wins, disps);
+        // 2. Lazy load thumbnails - Removed from here, handled by useEffect
+        // loadThumbnails(wins, disps);
 
       } catch (error) {
         console.error("Failed to load data:", error);
@@ -83,33 +83,80 @@ function App() {
     }
   };
 
-  const loadThumbnails = async (wins: WindowInfo[], disps: DisplayInfo[]) => {
-    if (!(window as any).electron) return;
+  // Effect to load thumbnails when windows/displays change and have missing thumbnails
+  useEffect(() => {
+    let isMounted = true;
 
-    // Fetch window thumbnails
-    for (const win of wins) {
-      try {
-        const result = await (window as any).electron.getWindowThumbnail(win.id);
-        if (result && result.thumbnail) {
-          setWindows(prev => prev.map(w => w.id === win.id ? { ...w, thumbnail: result.thumbnail } : w));
-        }
-      } catch (e) {
-        console.error(`Failed to load thumbnail for window ${win.id}`, e);
-      }
-    }
+    const loadMissingThumbnails = async () => {
+      if (!(window as any).electron) return;
 
-    // Fetch display thumbnails
-    for (const disp of disps) {
-      try {
-        const result = await (window as any).electron.getDisplayThumbnail(disp.id);
-        if (result && result.thumbnail) {
-          setDisplays(prev => prev.map(d => d.id === disp.id ? { ...d, thumbnail: result.thumbnail } : d));
+      // Check for windows without thumbnails
+      const windowsNeedingThumbnails = windows.filter(w => !w.thumbnail);
+      if (windowsNeedingThumbnails.length > 0) {
+        console.log(`Loading thumbnails for ${windowsNeedingThumbnails.length} windows...`);
+
+        // Process in chunks of 5 to avoid overwhelming the backend/UI
+        const chunkSize = 5;
+        for (let i = 0; i < windowsNeedingThumbnails.length; i += chunkSize) {
+          if (!isMounted) return;
+
+          const chunk = windowsNeedingThumbnails.slice(i, i + chunkSize);
+          const results = await Promise.all(chunk.map(async (win) => {
+            try {
+              const result = await (window as any).electron.getWindowThumbnail(win.id);
+              return { id: win.id, thumbnail: result?.thumbnail };
+            } catch (e) {
+              console.error(`Failed to load thumbnail for window ${win.id}`, e);
+              return null;
+            }
+          }));
+
+          if (!isMounted) return;
+
+          // Update state with the batch of results
+          setWindows(prev => {
+            const newWindows = [...prev];
+            results.forEach(res => {
+              if (res && res.thumbnail) {
+                const index = newWindows.findIndex(w => w.id === res.id);
+                if (index !== -1) {
+                  newWindows[index] = { ...newWindows[index], thumbnail: res.thumbnail };
+                }
+              }
+            });
+            return newWindows;
+          });
+
+          // Small delay to allow UI to breathe
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
-      } catch (e) {
-        console.error(`Failed to load thumbnail for display ${disp.id}`, e);
       }
-    }
-  };
+
+      // Check for displays without thumbnails
+      const displaysNeedingThumbnails = displays.filter(d => !d.thumbnail);
+      if (displaysNeedingThumbnails.length > 0) {
+        for (const disp of displaysNeedingThumbnails) {
+          if (!isMounted) return;
+          try {
+            const result = await (window as any).electron.getDisplayThumbnail(disp.id);
+            if (result && result.thumbnail) {
+              setDisplays(prev => prev.map(d => d.id === disp.id ? { ...d, thumbnail: result.thumbnail } : d));
+            }
+          } catch (e) {
+            console.error(`Failed to load thumbnail for display ${disp.id}`, e);
+          }
+        }
+      }
+    };
+
+    loadMissingThumbnails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [windows.length, displays.length]); // Only trigger when count changes (initial load)
+
+
 
   const handleWindowSelect = async (windowId: number) => {
     setSelectedWindowId(windowId);
