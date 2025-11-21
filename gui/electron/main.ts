@@ -93,7 +93,7 @@ ipcMain.handle('get-window-thumbnail', async (_event, windowId: number) => {
         console.log(`[IPC] Requesting thumbnail for window ${windowId}`);
 
         const cmdStart = Date.now();
-        const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()], 500); // 500ms timeout
+        const stdout = await runCaptureCommand('get_window_thumbnail', [windowId.toString()], 200); // 200ms timeout
         const cmdDuration = Date.now() - cmdStart;
 
         const parseStart = Date.now();
