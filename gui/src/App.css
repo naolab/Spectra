@@ -16,6 +16,7 @@ h1 {
   text-align: center;
   margin: 0;
   background: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.02em;
@@ -217,4 +218,187 @@ h1 {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: white;
+}
+
+/* Header Controls */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.view-switcher {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.view-switcher button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.view-switcher button:hover {
+  color: var(--text-primary);
+}
+
+.view-switcher button.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--accent-primary);
+}
+
+/* Tabs */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Grid Layout */
+.grid-container {
+  height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.grid-item {
+  background: rgba(32, 34, 37, 0.6); /* Discord-like dark bg */
+  border: 2px solid transparent; /* Reserve space for border */
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.grid-item:hover {
+  background: rgba(47, 49, 54, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.grid-item.selected {
+  border-color: #3BA55C; /* Discord Green */
+  background: rgba(59, 165, 92, 0.1);
+}
+
+/* Selection Badge (Checkmark) */
+.grid-item.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #3BA55C;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail-placeholder {
+  aspect-ratio: 16/9;
+  background: #2F3136; /* Darker placeholder bg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem; /* Larger icon */
+  color: #72767D; /* Muted icon color */
+  transition: color 0.2s ease;
+}
+
+.grid-item:hover .thumbnail-placeholder {
+  color: #dcddde; /* Lighter icon on hover */
+}
+
+.thumbnail-image {
+  aspect-ratio: 16/9;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.grid-item-info {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.grid-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #DCDDDE; /* Light text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-item-meta {
+  font-size: 0.75rem;
+  color: #72767D; /* Muted text */
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }

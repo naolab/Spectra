@@ -19,6 +19,18 @@ struct SpectraCapture {
             listWindows()
         case "list_displays":
             listDisplays()
+        case "get_window_thumbnail":
+            guard args.count > 2, let windowId = CGWindowID(args[2]) else {
+                print("Error: Missing or invalid window ID")
+                exit(1)
+            }
+            getWindowThumbnail(windowId: windowId)
+        case "get_display_thumbnail":
+            guard args.count > 2, let displayId = UInt32(args[2]) else {
+                print("Error: Missing or invalid display ID")
+                exit(1)
+            }
+            getDisplayThumbnail(displayId: displayId)
         case "capture_window":
             guard args.count > 2, let windowId = CGWindowID(args[2]) else {
                 print("Error: Missing or invalid window ID")
@@ -56,6 +68,8 @@ struct SpectraCapture {
         Commands:
           list_windows
           list_displays
+          get_window_thumbnail <windowId>
+          get_display_thumbnail <displayId>
           capture_window <windowId>
           capture_display [displayId]
           capture_region <x> <y> <w> <h>
@@ -77,18 +91,46 @@ struct SpectraCapture {
             }
             
             let name = dict[kCGWindowName as String] as? String ?? ""
+            let layer = dict[kCGWindowLayer as String] as? Int ?? 0
             
-            // Filter out some system windows if needed, but for now keep all
+            // Filter out small windows or windows without title (unless layer 0)
+            // This matches the logic in App.tsx to avoid unnecessary captures
+            let widthNum = bounds["Width"] as? NSNumber
+            let heightNum = bounds["Height"] as? NSNumber
+            let width = widthNum?.doubleValue ?? 0
+            let height = heightNum?.doubleValue ?? 0
+            let hasTitle = !name.trimmingCharacters(in: .whitespaces).isEmpty
+            
+            // Exclude known system windows that are not useful for screen sharing
+            let excludedOwners = [
+                "Window Server",
+                "Control Center",
+                "Notification Center",
+                "SystemUIServer",
+                "CursorUIViewService",
+                "Dock",
+                "Siri",
+                "Talagent",
+                "Spotlight",
+                "Electron" // Exclude self to avoid capture issues
+            ]
+            
+            if width <= 50 || height <= 50 || (!hasTitle && layer != 0) || excludedOwners.contains(ownerName) {
+                return nil
+            }
+            
+            // NOTE: Thumbnail generation removed for lazy loading
             
             return [
                 "id": id,
                 "ownerName": ownerName,
                 "name": name,
                 "bounds": bounds,
-                "layer": dict[kCGWindowLayer as String] ?? 0
+                "layer": layer,
+                "thumbnail": "" // Empty thumbnail for lazy loading
             ]
         }
-
+        
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: windows, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -124,13 +166,16 @@ struct SpectraCapture {
             ]
             let isMain = CGDisplayIsMain(displayId) == 1
             
+            // NOTE: Thumbnail generation removed for lazy loading
+            
             displays.append([
                 "id": displayId,
                 "width": width,
                 "height": height,
                 "bounds": bounds,
                 "isMain": isMain,
-                "name": "Display \(i + 1)"
+                "name": "Display \(i + 1)",
+                "thumbnail": "" // Empty thumbnail for lazy loading
             ])
         }
         
@@ -143,6 +188,81 @@ struct SpectraCapture {
             print("Error serializing JSON: \(error)")
             exit(1)
         }
+    }
+    
+    static func getWindowThumbnail(windowId: CGWindowID) {
+        var thumbnail: String? = nil
+        // Use nominalResolution for thumbnails to save CPU
+        let imageOption: CGWindowImageOption = [.boundsIgnoreFraming, .nominalResolution]
+        if let cgImage = CGWindowListCreateImage(.null, .optionIncludingWindow, windowId, imageOption) {
+            thumbnail = generateThumbnailBase64(from: cgImage)
+        }
+        
+        let result = [
+            "id": windowId,
+            "thumbnail": thumbnail ?? ""
+        ] as [String : Any]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+            exit(1)
+        }
+    }
+    
+    static func getDisplayThumbnail(displayId: CGDirectDisplayID) {
+        var thumbnail: String? = nil
+
+        // Get display bounds
+        let bounds = CGDisplayBounds(displayId)
+
+        // Capture all windows on this display (including wallpaper and apps)
+        // Using CGWindowListCreateImage instead of CGDisplayCreateImage to capture everything
+        if let cgImage = CGWindowListCreateImage(bounds, .optionOnScreenOnly, kCGNullWindowID, .bestResolution) {
+            thumbnail = generateThumbnailBase64(from: cgImage)
+        }
+
+        let result = [
+            "id": displayId,
+            "thumbnail": thumbnail ?? ""
+        ] as [String : Any]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: result, options: [])
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+            exit(1)
+        }
+    }
+    
+    static func generateThumbnailBase64(from cgImage: CGImage) -> String? {
+        let maxDimension: CGFloat = 400 // Max width or height for thumbnail
+        let width = CGFloat(cgImage.width)
+        let height = CGFloat(cgImage.height)
+        
+        let scale = min(maxDimension / width, maxDimension / height)
+        let newWidth = width * scale
+        let newHeight = height * scale
+        
+        let newSize = NSSize(width: newWidth, height: newHeight)
+        let image = NSImage(cgImage: cgImage, size: NSSize(width: width, height: height))
+        
+        guard let resizedImage = image.resized(to: newSize) else { return nil }
+        
+        guard let tiffData = resizedImage.tiffRepresentation,
+              let bitmapRep = NSBitmapImageRep(data: tiffData),
+              let jpegData = bitmapRep.representation(using: .jpeg, properties: [.compressionFactor: 0.6]) else {
+            return nil
+        }
+        
+        return jpegData.base64EncodedString()
     }
 
     static func captureWindow(windowId: CGWindowID) {
@@ -195,3 +315,24 @@ struct SpectraCapture {
 
 // Helper for NSBitmapImageRep
 import AppKit
+
+extension NSImage {
+    func resized(to newSize: NSSize) -> NSImage? {
+        if let bitmapRep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: Int(newSize.width), pixelsHigh: Int(newSize.height),
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ) {
+            bitmapRep.size = newSize
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmapRep)
+            self.draw(in: NSRect(x: 0, y: 0, width: newSize.width, height: newSize.height), from: .zero, operation: .copy, fraction: 1.0)
+            NSGraphicsContext.restoreGraphicsState()
+            
+            let resizedImage = NSImage(size: newSize)
+            resizedImage.addRepresentation(bitmapRep)
+            return resizedImage
+        }
+        return nil
+    }
+}

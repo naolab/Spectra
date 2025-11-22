@@ -27,7 +27,8 @@ const __dirname = path.dirname(__filename);
 // Binary is in capture/mac/.build/debug/mac
 const PROJECT_ROOT = path.resolve(__dirname, "../.."); // dist -> mcp-server -> Spectra
 const SWIFT_BINARY_PATH = path.resolve(PROJECT_ROOT, "capture/mac/.build/debug/mac");
-const SETTINGS_PATH = path.resolve(PROJECT_ROOT, "settings.json");
+const HOME_DIR = process.env.HOME || "";
+const SETTINGS_PATH = path.join(HOME_DIR, "Library/Application Support/Spectra/settings.json");
 
 interface Settings {
     target: {
@@ -141,7 +142,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 return await captureBasedOnSettings(settings);
             }
             case "screen_list_windows": {
-                const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ["list_windows"]);
+                const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, ["list_windows"], {
+                    maxBuffer: 10 * 1024 * 1024, // 10MB buffer for window list
+                });
                 return {
                     content: [
                         {
@@ -198,6 +201,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 // Merge with existing settings
                 const currentSettings = await readSettings();
                 const updatedSettings = { ...currentSettings, ...newSettings };
+                await fs.mkdir(path.dirname(SETTINGS_PATH), { recursive: true });
                 await fs.writeFile(SETTINGS_PATH, JSON.stringify(updatedSettings, null, 2));
                 return {
                     content: [
@@ -277,7 +281,9 @@ async function captureBasedOnSettings(settings: Settings) {
 }
 
 async function runCaptureCommand(command: string, args: string[]) {
-    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args]);
+    const { stdout } = await execFileAsync(SWIFT_BINARY_PATH, [command, ...args], {
+        maxBuffer: 50 * 1024 * 1024, // 50MB buffer for high-resolution captures
+    });
     // Swift outputs JSON: { type: "image", format: "jpeg", data: "base64..." }
     // We need to parse it.
     try {

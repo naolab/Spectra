@@ -14,6 +14,11 @@
         "unknownDisplay": "Unknown Display",
         "unknownWindow": "Unknown Window",
         "unknownApp": "Unknown App",
-        "noTitle": "(No Title)"
+        "noTitle": "(No Title)",
+        "viewMode": "View Mode",
+        "list": "List",
+        "grid": "Grid",
+        "apps": "Applications",
+        "screens": "Screens"
     }
 }

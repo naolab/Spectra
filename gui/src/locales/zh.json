@@ -14,6 +14,11 @@
         "unknownDisplay": "未知显示器",
         "unknownWindow": "未知窗口",
         "unknownApp": "未知应用",
-        "noTitle": "(无标题)"
+        "noTitle": "(无标题)",
+        "viewMode": "视图模式",
+        "list": "列表",
+        "grid": "网格",
+        "apps": "应用",
+        "screens": "屏幕"
     }
 }

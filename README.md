@@ -2,8 +2,24 @@
 
 **AIエージェントのための画面共有・操作インターフェース (macOS専用)**
 
-Spectraは、AIエージェント（Claude, ChatGPTなど）がPCの画面を「見て」、操作対象を「選ぶ」ためのブリッジアプリケーションです。
+Spectraは、AIエージェント（Claude, Gemini, Codexなど）がPCの画面を「見て」、操作対象を「選ぶ」ためのブリッジアプリケーションです。
 Electron製のGUIでキャプチャ対象（ウィンドウやディスプレイ）を選択し、MCP (Model Context Protocol) サーバーを通じてAIに画像を提供します。
+
+## 主な機能
+
+- **Discord風GUI**: 直感的なインターフェースでキャプチャ対象（ウィンドウ/画面）を選択
+- **MCPサーバー**: AIクライアントからのリクエストに応じて画面キャプチャを提供
+- **マルチクライアント対応**: Claude, Gemini, Codexなど複数のAIツールに対応
+
+## 対応AIクライアント
+
+| クライアント | 対応状況 | 備考 |
+| --- | --- | --- |
+| **Claude CLI** | ✅ 完璧 | 推奨クライアント |
+| **Claude Desktop** | ✅ 完璧 | GUIで利用可能 |
+| **Claude Code** | ✅ 完璧 | VS Code拡張機能 |
+| **Gemini CLI** | ✅ 動作 | APIクォータ制限に注意 |
+| **Codex CLI** | ✅ 動作 | キャプチャできない可能性あり（環境・モデル依存） |
 
 ## アーキテクチャ
 
@@ -13,81 +29,66 @@ Electron製のGUIでキャプチャ対象（ウィンドウやディスプレイ
 2.  **MCP Server (Node.js)**: AIクライアントからのリクエストを受け付け、キャプチャを実行するサーバー。
 3.  **Capture Layer (Swift)**: macOSのネイティブAPIを使用して画面キャプチャを行うCLIツール。
 
-## 必要要件
+## クイックスタート
 
-*   macOS (Screen Recording APIを使用するため)
-*   Node.js (v18以上推奨)
-*   Swift (Xcode Command Line Tools)
+詳細なセットアップ手順は [README_MCP_SETUP.md](README_MCP_SETUP.md) を参照してください。
 
-## インストール
+### 1. インストールとビルド
 
-### 1. リポジトリのクローン
 ```bash
-git clone <repository-url>
+# リポジトリのクローン
+git clone https://github.com/naolab/Spectra.git
 cd Spectra
-```
 
-### 2. Swiftキャプチャツールのビルド
-キャプチャ機能の中核となるネイティブツールをコンパイルします。
-```bash
+# Swiftキャプチャツールのビルド
 cd capture/mac
 swift build -c release
-```
-※ 初回実行時にmacOSの「画面収録」の許可を求められる場合があります。システム設定から許可してください。
 
-### 3. MCPサーバーのセットアップ
-AIとの通信を行うサーバーを準備します。
-```bash
+# MCPサーバーのビルド
 cd ../../mcp-server
-npm install
-npm run build
-```
+npm install && npm run build
 
-### 4. GUIアプリのセットアップ
-設定画面を準備します。
-```bash
+# GUIアプリのセットアップ
 cd ../gui
 npm install
 ```
 
-## 使い方
-
-### GUIの起動（設定画面）
-キャプチャ対象（ウィンドウやディスプレイ）を選択するためにGUIを起動します。
+### 2. GUIの起動
 
 ```bash
 cd gui
 npm run electron:dev
 ```
 
-*   **Displays**: 画面全体をキャプチャ対象にします。
-*   **Windows**: 特定のウィンドウをキャプチャ対象にします。
-*   **Refresh List**: ウィンドウリストを更新します（新しいウィンドウを開いた時などに使用）。
+GUIが起動したら、キャプチャしたいウィンドウまたは画面を選択します。
 
-### MCPサーバーの起動
-AIエージェント（Claude Desktopなど）から接続するための設定です。
+### 3. AIクライアントから利用
 
-**Claude Desktopの設定例 (`~/Library/Application Support/Claude/claude_desktop_config.json`):**
+**Claude CLIの場合**:
 
-```json
-{
-  "mcpServers": {
-    "spectra": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/Spectra/mcp-server/dist/index.js"
-      ]
-    }
-  }
-}
+```bash
+# 初回設定
+claude mcp add spectra node /absolute/path/to/Spectra/mcp-server/dist/index.js
+
+# 使う
+claude "画面を見て、何が表示されているか教えて"
 ```
-※ パスは実際の環境に合わせて書き換えてください。
+
+**Gemini CLIの場合**:
+
+```bash
+# 初回設定
+gemini mcp add spectra node /absolute/path/to/Spectra/mcp-server/dist/index.js
+
+# 使う
+gemini "画面を見て"
+```
 
 ## トラブルシューティング
 
 ### ウィンドウリストにアプリが表示されない
 *   **画面収録の許可**: システム設定 > プライバシーとセキュリティ > 画面収録 で、ターミナル（iTerm2など）やSpectra（ビルド後のアプリ）が許可されているか確認してください。
-*   **別スペースのウィンドウ**: macOSの制限により、現在表示されているスペース（デスクトップ）にあるウィンドウのみがリストアップされます。対象のアプリがあるスペースに移動してから「Refresh List」を押してください。
+*   **別スペースのウィンドウ**: macOSの制限により、現在表示されているスペース（デスクトップ）にあるウィンドウのみがリストアップされます。
 
 ### キャプチャ画像が真っ黒になる
 *   DRM保護されたコンテンツ（Netflixなど）はキャプチャできません。
