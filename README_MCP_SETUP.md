@@ -17,9 +17,9 @@ MCP（Model Context Protocol）を使用して、AIと画面共有を実現し�
 - macOS（現在はmacOSのみ対応）
 - Node.js がインストールされていること
 - 各AI CLIの課金アカウント（MCPサーバー機能を使用するため）
-  - Claude CLI/Desktop/Code: Claude Pro アカウント
-  - Gemini CLI: Google AI Studio API（課金アカウント）
-  - Codex CLI: OpenAI API（課金アカウント）
+  - Claude CLI/Desktop/Code: Claude Pro（月額$20、年払いで$17/月）
+  - Gemini CLI: Google AI Studio APIキー（無料枠あり、課金で制限緩和）
+  - Codex CLI: ChatGPT Plus以上（Plus: 月額$20、Pro/Business/Enterprise）
 
 ---
 
@@ -321,7 +321,7 @@ npm install -g @anthropic-ai/claude-cli
 1. **GUIアプリ + MCPサーバー**を配布
 2. **README（このファイル）**を同梱
 3. ユーザーは上記のセットアップ手順に従う
-4. **各AI CLIの課金アカウントが必要**であることを明記（Claude Pro、Google AI Studio API、OpenAI API等）
+4. **各AI CLIの課金アカウントが必要**であることを明記（Claude Pro、Google AI Studio APIキー、ChatGPT Plus等）
 
 ---
 
