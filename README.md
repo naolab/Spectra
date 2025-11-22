@@ -37,7 +37,7 @@ Electron製のGUIでキャプチャ対象（ウィンドウやディスプレイ
 
 ```bash
 # リポジトリのクローン
-git clone <repository-url>
+git clone https://github.com/naolab/Spectra.git
 cd Spectra
 
 # Swiftキャプチャツールのビルド

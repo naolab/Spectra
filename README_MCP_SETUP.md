@@ -1,7 +1,7 @@
 # Spectra MCPサーバー セットアップガイド
 
 ## 概要
-SpectraはAI（Claude）がローカルPCの画面を自動的に見ることができるツールです。
+SpectraはAI（Claude、Gemini、Codexなど）がローカルPCの画面を自動的に見ることができるツールです。
 MCP（Model Context Protocol）を使用して、AIと画面共有を実現します。
 
 **対応しているAI製品**:
@@ -42,7 +42,7 @@ npm install -g @anthropic-ai/claude-cli
 ### 3. MCPサーバーの登録
 
 ```bash
-claude mcp add spectra node /Users/nao/Desktop/develop/CLI\ 画面共有アプリ/Spectra/mcp-server/dist/index.js
+claude mcp add spectra node /path/to/Spectra/mcp-server/dist/index.js
 ```
 
 **注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
@@ -71,7 +71,7 @@ npm install -g @google/generative-ai-cli
 #### 2. Spectra MCPサーバーを登録
 
 ```bash
-gemini mcp add spectra node /Users/nao/Desktop/develop/CLI\ 画面共有アプリ/Spectra/mcp-server/dist/index.js
+gemini mcp add spectra node /path/to/Spectra/mcp-server/dist/index.js
 ```
 
 **注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
@@ -116,7 +116,7 @@ nano ~/.codex/config.toml
 ```toml
 [mcp_servers.spectra]
 command = "node"
-args = ["/Users/nao/Desktop/develop/CLI 画面共有アプリ/Spectra/mcp-server/dist/index.js"]
+args = ["/path/to/Spectra/mcp-server/dist/index.js"]
 ```
 
 **注意**: `args`のパスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
@@ -260,13 +260,13 @@ codex "画面を見て"
 codex "ウィンドウ一覧を教えて"
 ```
 
-**注意**: Codexはコンテキストウィンドウが小さいため、画面キャプチャ（`screen_capture_latest`）を使うとエラーが出る場合があります。ウィンドウ一覧の取得など、画像を含まないツールは正常に動作します。
+**注意**: 環境やモデルによっては、画面キャプチャ（`screen_capture_latest`）を使うとエラーが出る場合があります。ウィンドウ一覧の取得など、画像を含まないツールは正常に動作します。
 
 ---
 
 ## 利用可能なMCPツール
 
-Claudeが自動的に以下のツールを使用します：
+AIが自動的に以下のツールを使用します：
 
 - `screen_capture_latest`: 設定に基づいて画面をキャプチャ
 - `screen_list_windows`: ウィンドウ一覧を取得
@@ -322,12 +322,3 @@ npm install -g @anthropic-ai/claude-cli
 2. **README（このファイル）**を同梱
 3. ユーザーは上記のセットアップ手順に従う
 4. **各AI CLIの課金アカウントが必要**であることを明記（Claude Pro、Google AI Studio APIキー、ChatGPT Plus等）
-
----
-
-## 今後の拡張
-
-- Windows対応
-- Linux対応
-- OpenAI API対応（GPTでも使えるように）
-- REST API化（汎用的なHTTP APIとして提供）
