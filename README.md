@@ -57,7 +57,7 @@ npm install -g spectra-mcp
 
 ```bash
 # 初回設定
-claude mcp add spectra node /absolute/path/to/Spectra/mcp-server/dist/index.js
+claude mcp add spectra spectra-mcp
 
 # 使う
 claude "画面を見て、何が表示されているか教えて"
@@ -67,7 +67,7 @@ claude "画面を見て、何が表示されているか教えて"
 
 ```bash
 # 初回設定
-gemini mcp add spectra node /absolute/path/to/Spectra/mcp-server/dist/index.js
+gemini mcp add spectra spectra-mcp
 
 # 使う
 gemini "画面を見て"
