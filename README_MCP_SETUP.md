@@ -55,11 +55,21 @@ npm install -g @anthropic-ai/claude-cli
 
 ### 3. MCPサーバーの登録
 
+用途に合わせて、以下のいずれかの方法で登録してください。
+
+#### A. どこでも使えるようにする（推奨）
+どのディレクトリにいてもSpectraを使えるようにします。
+
+```bash
+claude mcp add spectra spectra-mcp --scope user
+```
+
+#### B. 現在のプロジェクトだけで使う
+現在開いているディレクトリ（プロジェクト）でのみ有効にします。
+
 ```bash
 claude mcp add spectra spectra-mcp
 ```
-
-**注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
 
 ### 4. 登録確認
 

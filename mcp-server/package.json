@@ -1,6 +1,6 @@
 {
   "name": "spectra-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP Server for Spectra - AI Screen Sharing Tool",
   "main": "dist/index.js",
   "bin": {
@@ -26,8 +26,10 @@
   "author": "naolab",
   "license": "ISC",
   "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0"
+  },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.22.0",
     "@types/node": "^24.10.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

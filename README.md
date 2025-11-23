@@ -57,7 +57,7 @@ npm install -g spectra-mcp
 
 ```bash
 # 初回設定
-claude mcp add spectra spectra-mcp
+claude mcp add spectra spectra-mcp --scope user
 
 # 使う
 claude "画面を見て、何が表示されているか教えて"
