@@ -1,16 +1,29 @@
 {
-  "name": "mcp-server",
+  "name": "spectra-mcp",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "MCP Server for Spectra - AI Screen Sharing Tool",
+  "main": "dist/index.js",
+  "bin": {
+    "spectra-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build && node scripts/copy-binary.js",
     "start": "node dist/index.js",
     "dev": "tsc && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "mcp",
+    "spectra",
+    "ai",
+    "screen-sharing"
+  ],
+  "author": "naolab",
   "license": "ISC",
   "type": "module",
   "devDependencies": {

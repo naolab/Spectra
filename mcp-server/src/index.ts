@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -15,20 +16,40 @@ import { fileURLToPath } from "url";
 const execFileAsync = promisify(execFile);
 
 // Determine paths
-// Assuming running from mcp-server directory or compiled to dist
-// If running with ts-node from mcp-server/src, __dirname is src.
-// If running from dist, __dirname is dist.
-// We need to find the project root.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Adjust this based on where the built binary is expected to be relative to this file
-// If this file is in mcp-server/src/index.ts
-// Binary is in capture/mac/.build/debug/mac
-const PROJECT_ROOT = path.resolve(__dirname, "../.."); // dist -> mcp-server -> Spectra
-const SWIFT_BINARY_PATH = path.resolve(PROJECT_ROOT, "capture/mac/.build/debug/mac");
 const HOME_DIR = process.env.HOME || "";
 const SETTINGS_PATH = path.join(HOME_DIR, "Library/Application Support/Spectra/settings.json");
+
+// Path resolution for Swift binary
+// 1. Check for bundled binary (npm install / dist)
+//    Structure: package/dist/index.js -> package/bin/mac
+const BUNDLED_BINARY_PATH = path.resolve(__dirname, "../bin/mac");
+
+// 2. Check for local dev binary (source checkout)
+//    Structure: mcp-server/src/index.ts -> ../../capture/mac/.build/debug/mac
+//    Or: mcp-server/dist/index.js -> ../../capture/mac/.build/debug/mac
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const DEV_BINARY_PATH = path.resolve(PROJECT_ROOT, "capture/mac/.build/debug/mac");
+const DEV_RELEASE_BINARY_PATH = path.resolve(PROJECT_ROOT, "capture/mac/.build/release/mac");
+
+let SWIFT_BINARY_PATH = BUNDLED_BINARY_PATH;
+
+async function resolveBinaryPath() {
+    try {
+        await fs.access(BUNDLED_BINARY_PATH);
+        return BUNDLED_BINARY_PATH;
+    } catch {
+        // Fallback to dev paths
+        try {
+            await fs.access(DEV_RELEASE_BINARY_PATH);
+            return DEV_RELEASE_BINARY_PATH;
+        } catch {
+            return DEV_BINARY_PATH;
+        }
+    }
+}
 
 interface Settings {
     target: {
@@ -295,6 +316,9 @@ async function runCaptureCommand(command: string, args: string[]) {
 }
 
 async function main() {
+    SWIFT_BINARY_PATH = await resolveBinaryPath();
+    // console.error(`Using Swift binary at: ${SWIFT_BINARY_PATH}`); // Debug log
+
     const transport = new StdioServerTransport();
     await server.connect(transport);
 }

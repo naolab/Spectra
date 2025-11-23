@@ -39,17 +39,13 @@ Electron製のGUIでキャプチャ対象（ウィンドウやディスプレイ
 
 ### 2. MCPサーバーのセットアップ（必須）
 
-AIエージェントがSpectraを利用するには、MCPサーバーをローカルで実行する必要があります。現在はソースコードからのビルドが必要です。
+AIエージェントがSpectraを利用するには、MCPサーバーをローカルで実行する必要があります。npm経由で簡単にインストールできます。
 
 ```bash
-# リポジトリのクローン
-git clone https://github.com/naolab/Spectra.git
-cd Spectra
-
-# MCPサーバーのビルド
-cd mcp-server
-npm install && npm run build
+npm install -g spectra-mcp
 ```
+
+※ まだnpmに公開されていない場合は、リポジトリをクローンして `npm install -g .` でインストールしてください。
 
 ### 3. GUIの起動
 

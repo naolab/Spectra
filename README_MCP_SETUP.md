@@ -33,18 +33,19 @@ MCP（Model Context Protocol）を使用して、AIと画面共有を実現し�
 
 ### 2. MCPサーバーのセットアップ
 
-MCPサーバーは現在、ソースコードからビルドする必要があります。
+npmを使用してMCPサーバーをインストールします。
 
 ```bash
-# リポジトリをクローン（まだの場合）
-git clone https://github.com/naolab/Spectra.git
-cd Spectra
-
-# MCPサーバーをビルド
-cd mcp-server
-npm install
-npm run build
+npm install -g spectra-mcp
 ```
+
+インストール後、以下のコマンドでサーバーのパスを確認できます：
+
+```bash
+which spectra-mcp
+```
+
+通常は `/usr/local/bin/spectra-mcp` などにインストールされます。
 
 ### 2. Claude CLIのインストール
 
@@ -55,7 +56,7 @@ npm install -g @anthropic-ai/claude-cli
 ### 3. MCPサーバーの登録
 
 ```bash
-claude mcp add spectra node /path/to/Spectra/mcp-server/dist/index.js
+claude mcp add spectra spectra-mcp
 ```
 
 **注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
@@ -84,7 +85,7 @@ npm install -g @google/generative-ai-cli
 #### 2. Spectra MCPサーバーを登録
 
 ```bash
-gemini mcp add spectra node /path/to/Spectra/mcp-server/dist/index.js
+gemini mcp add spectra spectra-mcp
 ```
 
 **注意**: パスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
@@ -128,8 +129,8 @@ nano ~/.codex/config.toml
 
 ```toml
 [mcp_servers.spectra]
-command = "node"
-args = ["/path/to/Spectra/mcp-server/dist/index.js"]
+command = "spectra-mcp"
+args = []
 ```
 
 **注意**: `args`のパスは絶対パスで指定してください。上記は例なので、実際のパスに置き換えてください。
