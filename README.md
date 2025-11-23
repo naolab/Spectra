@@ -33,34 +33,27 @@ Electron製のGUIでキャプチャ対象（ウィンドウやディスプレイ
 
 詳細なセットアップ手順は [README_MCP_SETUP.md](README_MCP_SETUP.md) を参照してください。
 
-### 1. インストールとビルド
+### 1. アプリのインストール（GUI）
+
+**[GitHub Releases](https://github.com/naolab/Spectra/releases)** から最新の `.dmg` ファイルをダウンロードしてインストールしてください。
+
+### 2. MCPサーバーのセットアップ（必須）
+
+AIエージェントがSpectraを利用するには、MCPサーバーをローカルで実行する必要があります。現在はソースコードからのビルドが必要です。
 
 ```bash
 # リポジトリのクローン
 git clone https://github.com/naolab/Spectra.git
 cd Spectra
 
-# Swiftキャプチャツールのビルド
-cd capture/mac
-swift build -c release
-
 # MCPサーバーのビルド
-cd ../../mcp-server
+cd mcp-server
 npm install && npm run build
-
-# GUIアプリのセットアップ
-cd ../gui
-npm install
 ```
 
-### 2. GUIの起動
+### 3. GUIの起動
 
-```bash
-cd gui
-npm run electron:dev
-```
-
-GUIが起動したら、キャプチャしたいウィンドウまたは画面を選択します。
+インストールした「Spectra」アプリを起動し、キャプチャしたいウィンドウまたは画面を選択します。
 
 ### 3. AIクライアントから利用
 

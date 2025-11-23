@@ -25,9 +25,22 @@ MCP（Model Context Protocol）を使用して、AIと画面共有を実現し�
 
 ## セットアップ手順
 
-### 1. MCPサーバーのビルド
+### 1. GUIアプリのインストール
+
+1. **[GitHub Releases](https://github.com/naolab/Spectra/releases)** から最新の `.dmg` をダウンロード。
+2. アプリをインストールして起動。
+3. 画面共有したいウィンドウまたはディスプレイを選択してください。
+
+### 2. MCPサーバーのセットアップ
+
+MCPサーバーは現在、ソースコードからビルドする必要があります。
 
 ```bash
+# リポジトリをクローン（まだの場合）
+git clone https://github.com/naolab/Spectra.git
+cd Spectra
+
+# MCPサーバーをビルド
 cd mcp-server
 npm install
 npm run build
@@ -144,14 +157,10 @@ MCPサーバーが正しく設定されていれば、Codexが自動的にSpectr
 
 ### GUIアプリでキャプチャ対象を選択
 
-```bash
-cd gui
-npm run electron:dev
-```
+インストールした「Spectra」アプリを起動し、以下の手順で設定します：
 
-GUIアプリが起動したら：
 1. キャプチャしたいウィンドウまたは画面を選択
-2. 選択すると自動的に`settings.json`に保存される
+2. 選択すると自動的に設定が保存され、MCPサーバーから参照可能になります
 
 ### Claude CLIで画面共有
 
